@@ -1,0 +1,16 @@
+Scalability points:
+
+1. Per-Camera Locks Instead of Global Lock
+Replace self._lock with per-camera locks inside each CameraWrapper.
+This avoids global contention and lets camera operations run independently.
+
+2. Sharding (multiprocess + multi threading)
+Group cameras into batches (e.g., 10 cameras per process), and run multiple CameraManagers, each managing its own set of threads.
+A top-level “Registry” process aggregates health info.
+
+3. Move Monitoring per Camera
+Instead of one _monitor_loop walking all cameras, let each CameraWrapper self-report stats (FPS, memory, CPU) periodically into a shared dict or queue.
+This reduces central bottlenecks.
+
+3. GPU or Hardware Offloading (if decoding is bottleneck)
+Encoding/decoding frames (e.g., H.264/H.265 RTSP streams), moving decoding to GPU or dedicated hardware helps a lot.
